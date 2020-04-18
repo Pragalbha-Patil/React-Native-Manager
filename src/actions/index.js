@@ -1,3 +1,4 @@
+import {Actions} from 'react-native-router-flux';
 import Firebase from '../firebase';
 import {
     EMAIL_CHANGED,
@@ -29,31 +30,29 @@ export const loginUser = ({email, password}) => {
         // will try to login first
         Firebase.auth().signInWithEmailAndPassword(email, password)
             // if credentials exist, login
-            .then(user => {
-                dispatch({
-                    type: LOGIN_USER_SUCCESS,
-                    payload: user
-                })
-            })
+            .then(user => loginUserSuccess(dispatch, user))
             // if new user, sign up
             .catch(() => {
                 // sign up method is called
                 Firebase.auth().createUserWithEmailAndPassword(email, password)
                     // if user created, success
-                    .then(user =>
-                        dispatch({
-                            type: LOGIN_USER_SUCCESS,
-                            payload: user
-                        })
-                    )
+                    .then(user => loginUserSuccess(dispatch, user))
                     // if user already exist and tried to create again, error.
-                    .catch(() =>
+                    .catch((error) => // console.log(error);
                         dispatch({
                             type: LOGIN_USER_FAIL
                         })
                     );
             });
     };
+};
+
+const loginUserSuccess = (dispatch, user) => {
+    dispatch({
+        type: LOGIN_USER_SUCCESS,
+        payload: user
+    });
+    Actions.main();
 };
 
 //TODO - if you get lost in this limbo of Redux ***
